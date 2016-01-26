@@ -1409,8 +1409,34 @@ set_file_times (int fd,
     utime_error (name);
 }
 
+
+void
+cpio_set_c_name (struct cpio_file_stat *file_hdr, char *name)
+{
+  static size_t buflen = 0;
+  size_t len = strlen (name) + 1;
+
+  if (buflen == 0)
+    {
+      buflen = len;
+      if (buflen < 32)
+        buflen = 32;
+      file_hdr->c_name = xmalloc (buflen);
+    }
+  else if (buflen < len)
+    {
+      buflen = len;
+      file_hdr->c_name = xrealloc (file_hdr->c_name, buflen);
+    }
+
+  file_hdr->c_namesize = len;
+  memmove (file_hdr->c_name, name, len);
+}
+
 /* Do we have to ignore absolute paths, and if so, does the filename
-   have an absolute path?  */
+   have an absolute path?  Before calling this function make sure that the
+   allocated NAME buffer has capacity at least 2 bytes. */
+
 void
 cpio_safer_name_suffix (char *name, bool link_target, bool absolute_names,
 			bool strip_leading_dots)
@@ -1425,6 +1451,10 @@ cpio_safer_name_suffix (char *name, bool link_target, bool absolute_names,
 	  ++p;
       }
   if (p != name)
+    /* The 'p' string is shortened version of 'name' with one exception;  when
+       the 'name' points to an empty string (buffer where name[0] == '\0') the
+       'p' then points to static string ".".  So caller needs to ensure there
+       are at least two bytes available in 'name' buffer so memmove succeeds. */
     memmove (name, p, (size_t)(strlen (p) + 1));
 }
 

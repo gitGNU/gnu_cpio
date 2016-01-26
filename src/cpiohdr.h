@@ -129,5 +129,6 @@ struct cpio_file_stat /* Internal representation of a CPIO header */
   char *c_tar_linkname;
 };
 
+void cpio_set_c_name(struct cpio_file_stat *file_hdr, char *name);
 
 #endif /* cpiohdr.h */

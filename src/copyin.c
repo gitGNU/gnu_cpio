@@ -76,28 +76,7 @@ query_rename(struct cpio_file_stat* file_hdr, FILE *tty_in, FILE *tty_out,
       return -1;
     }
   else
-  /* Debian hack: file_hrd.c_name is sometimes set to
-     point to static memory by code in tar.c.  This
-     causes a segfault.  This has been fixed and an
-     additional check to ensure that the file name
-     is not too long has been added.  (Reported by
-     Horst Knobloch.)  This bug has been reported to
-     "bug-gnu-utils@prep.ai.mit.edu". (99/1/6) -BEM */
-    {
-      if (archive_format != arf_tar && archive_format != arf_ustar)
-	{
-	  free (file_hdr->c_name);
-	  file_hdr->c_name = xstrdup (new_name.ds_string);
-	}
-      else
-	{
-	  if (is_tar_filename_too_long (new_name.ds_string))
-	    error (0, 0, _("%s: file name too long"),
-		   new_name.ds_string);
-	  else
-	    strcpy (file_hdr->c_name, new_name.ds_string);
-	}
-    }
+    cpio_set_c_name (file_hdr, new_name.ds_string);
   return 0;
 }
 
@@ -342,8 +321,7 @@ create_defered_links_to_skipped (struct cpio_file_stat *file_hdr,
 	    d_prev->next = d->next;
 	  else
 	    deferments = d->next;
-	  free (file_hdr->c_name);
-	  file_hdr->c_name = xstrdup(d->header.c_name);
+	  cpio_set_c_name (file_hdr, d->header.c_name);
 	  free_deferment (d);
 	  copyin_regular_file(file_hdr, in_file_des);
 	  return 0;
@@ -1012,6 +990,22 @@ read_in_header (struct cpio_file_stat *file_hdr, int in_des)
     }
 }
 
+static void
+read_name_from_file (struct cpio_file_stat *file_hdr, int fd, uintmax_t len)
+{
+  static char *tmp_filename;
+  static size_t buflen;
+
+  if (buflen < len)
+    {
+      buflen = len;
+      tmp_filename = xrealloc (tmp_filename, buflen);
+    }
+
+  tape_buffered_read (tmp_filename, fd, len);
+  cpio_set_c_name (file_hdr, tmp_filename);
+}
+
 /* Fill in FILE_HDR by reading an old-format ASCII format cpio header from
    file descriptor IN_DES, except for the magic number, which is
    already filled in.  */
@@ -1038,14 +1032,8 @@ read_in_old_ascii (struct cpio_file_stat *file_hdr, int in_des)
   file_hdr->c_rdev_min = minor (dev);
 
   file_hdr->c_mtime = FROM_OCTAL (ascii_header.c_mtime);
-  file_hdr->c_namesize = FROM_OCTAL (ascii_header.c_namesize);
   file_hdr->c_filesize = FROM_OCTAL (ascii_header.c_filesize);
-  
-  /* Read file name from input.  */
-  if (file_hdr->c_name != NULL)
-    free (file_hdr->c_name);
-  file_hdr->c_name = (char *) xmalloc (file_hdr->c_namesize + 1);
-  tape_buffered_read (file_hdr->c_name, in_des, (long) file_hdr->c_namesize);
+  read_name_from_file (file_hdr, in_des, FROM_OCTAL (ascii_header.c_namesize));
 
   /* HP/UX cpio creates archives that look just like ordinary archives,
      but for devices it sets major = 0, minor = 1, and puts the
@@ -1100,14 +1088,8 @@ read_in_new_ascii (struct cpio_file_stat *file_hdr, int in_des)
   file_hdr->c_dev_min = FROM_HEX (ascii_header.c_dev_min);
   file_hdr->c_rdev_maj = FROM_HEX (ascii_header.c_rdev_maj);
   file_hdr->c_rdev_min = FROM_HEX (ascii_header.c_rdev_min);
-  file_hdr->c_namesize = FROM_HEX (ascii_header.c_namesize);
   file_hdr->c_chksum = FROM_HEX (ascii_header.c_chksum);
-  
-  /* Read file name from input.  */
-  if (file_hdr->c_name != NULL)
-    free (file_hdr->c_name);
-  file_hdr->c_name = (char *) xmalloc (file_hdr->c_namesize);
-  tape_buffered_read (file_hdr->c_name, in_des, (long) file_hdr->c_namesize);
+  read_name_from_file (file_hdr, in_des, FROM_HEX (ascii_header.c_namesize));
 
   /* In SVR4 ASCII format, the amount of space allocated for the header
      is rounded up to the next long-word, so we might need to drop
@@ -1155,16 +1137,9 @@ read_in_binary (struct cpio_file_stat *file_hdr,
   file_hdr->c_rdev_min = minor (short_hdr->c_rdev);
   file_hdr->c_mtime = (unsigned long) short_hdr->c_mtimes[0] << 16
                       | short_hdr->c_mtimes[1];
-
-  file_hdr->c_namesize = short_hdr->c_namesize;
   file_hdr->c_filesize = (unsigned long) short_hdr->c_filesizes[0] << 16
                       | short_hdr->c_filesizes[1];
-
-  /* Read file name from input.  */
-  if (file_hdr->c_name != NULL)
-    free (file_hdr->c_name);
-  file_hdr->c_name = (char *) xmalloc (file_hdr->c_namesize);
-  tape_buffered_read (file_hdr->c_name, in_des, (long) file_hdr->c_namesize);
+  read_name_from_file (file_hdr, in_des, short_hdr->c_namesize);
 
   /* In binary mode, the amount of space allocated in the header for
      the filename is `c_namesize' rounded up to the next short-word,
@@ -1245,6 +1220,7 @@ process_copy_in ()
       read_pattern_file ();
     }
   file_hdr.c_name = NULL;
+  file_hdr.c_namesize = 0;
 
   if (rename_batch_file)
     {

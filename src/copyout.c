@@ -660,8 +660,7 @@ process_copy_out ()
 	  cpio_safer_name_suffix (input_name.ds_string, false,
 				  !no_abs_paths_flag, true);
 #ifndef HPUX_CDF
-	  file_hdr.c_name = input_name.ds_string;
-	  file_hdr.c_namesize = strlen (input_name.ds_string) + 1;
+	  cpio_set_c_name (&file_hdr, input_name.ds_string);
 #else
 	  if ( (archive_format != arf_tar) && (archive_format != arf_ustar) )
 	    {
@@ -670,16 +669,15 @@ process_copy_out ()
 		 properly recreate the directory as hidden (in case the
 		 files of a directory go into the archive before the
 		 directory itself (e.g from "find ... -depth ... | cpio")).  */
-	      file_hdr.c_name = add_cdf_double_slashes (input_name.ds_string);
-	      file_hdr.c_namesize = strlen (file_hdr.c_name) + 1;
+              cpio_set_c_name (&file_hdr,
+                               add_cdf_double_slashes (input_name.ds_string));
 	    }
 	  else
 	    {
 	      /* We don't mark CDF's in tar files.  We assume the "hidden"
 		 directory will always go into the archive before any of
 		 its files.  */
-	      file_hdr.c_name = input_name.ds_string;
-	      file_hdr.c_namesize = strlen (input_name.ds_string) + 1;
+              cpio_set_c_name (&file_hdr, input_name.ds_string);
 	    }
 #endif
 
@@ -866,8 +864,7 @@ process_copy_out ()
   file_hdr.c_chksum = 0;
 
   file_hdr.c_filesize = 0;
-  file_hdr.c_namesize = 11;
-  file_hdr.c_name = CPIO_TRAILER_NAME;
+  cpio_set_c_name (&file_hdr, CPIO_TRAILER_NAME);
   if (archive_format != arf_tar && archive_format != arf_ustar)
     write_out_header (&file_hdr, out_file_des);
   else

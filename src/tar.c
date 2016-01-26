@@ -282,7 +282,7 @@ read_in_tar_header (struct cpio_file_stat *file_hdr, int in_des)
       if (null_block ((long *) &tar_rec, TARRECORDSIZE))
 #endif
 	{
-	  file_hdr->c_name = CPIO_TRAILER_NAME;
+	  cpio_set_c_name (file_hdr, CPIO_TRAILER_NAME);
 	  return;
 	}
 #if 0
@@ -316,9 +316,11 @@ read_in_tar_header (struct cpio_file_stat *file_hdr, int in_des)
 	}
 
       if (archive_format != arf_ustar)
-	file_hdr->c_name = stash_tar_filename (NULL, tar_hdr->name);
+        cpio_set_c_name (file_hdr, stash_tar_filename (NULL, tar_hdr->name));
       else
-	file_hdr->c_name = stash_tar_filename (tar_hdr->prefix, tar_hdr->name);
+        cpio_set_c_name (file_hdr, stash_tar_filename (tar_hdr->prefix,
+                                                      tar_hdr->name));
+
       file_hdr->c_nlink = 1;
       file_hdr->c_mode = FROM_OCTAL (tar_hdr->mode);
       file_hdr->c_mode = file_hdr->c_mode & 07777;
@@ -398,7 +400,7 @@ read_in_tar_header (struct cpio_file_stat *file_hdr, int in_des)
 	case AREGTYPE:
 	  /* Old tar format; if the last char in filename is '/' then it is
 	     a directory, otherwise it's a regular file.  */
-	  if (file_hdr->c_name[strlen (file_hdr->c_name) - 1] == '/')
+	  if (file_hdr->c_name[file_hdr->c_namesize - 1] == '/')
 	    file_hdr->c_mode |= CP_IFDIR;
 	  else
 	    file_hdr->c_mode |= CP_IFREG;

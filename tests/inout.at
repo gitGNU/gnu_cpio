@@ -35,7 +35,22 @@ while read NAME LENGTH
 do
 	genfile --length $LENGTH > $NAME
 	echo $NAME
-done < filelist |
- cpio --quiet -o > archive])
+done < filelist > filelist_raw
+
+for format in bin odc newc crc tar ustar hpbin hpodc
+do
+    cpio --format=$format --quiet -o < filelist_raw > archive.$format
+    rm -rf output
+    mkdir output && cd output
+    cpio -i --quiet < ../archive.$format
+
+    while read file
+    do
+        test -f $file || echo "$file not found"
+    done < ../filelist_raw
+
+    cd ..
+done
+])
 
 AT_CLEANUP
