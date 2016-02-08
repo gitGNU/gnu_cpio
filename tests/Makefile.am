@@ -55,7 +55,8 @@ TESTSUITE_AT = \
  symlink-bad-length.at\
  symlink-long.at\
  symlink-to-stdout.at\
- version.at
+ version.at\
+ big-block-size.at
 
 TESTSUITE = $(srcdir)/testsuite
 

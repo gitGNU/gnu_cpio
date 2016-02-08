@@ -321,7 +321,7 @@ parse_opt (int key, char *arg, struct argp_state *state)
 
     case BLOCK_SIZE_OPTION:		/* --block-size */
       io_block_size = atoi (arg);
-      if (io_block_size < 1)
+      if (io_block_size < 1 || io_block_size > INT_MAX/512)
 	USAGE_ERROR ((0, 0, _("invalid block size")));
       io_block_size *= 512;
       break;
