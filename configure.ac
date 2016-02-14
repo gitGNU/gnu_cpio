@@ -60,10 +60,9 @@ CPIO_SYSDEP
 CPIO_PACKED_STRUCTS
 
 AC_ARG_ENABLE(mt,
- AC_HELP_STRING([--enable-mt], [Enable building of mt program]),
- [build_mt=$enableval])
+ AC_HELP_STRING([--enable-mt], [Enable building of mt program]))
 
-AM_CONDITIONAL([CPIO_MT_COND], [test $build_mt = yes])
+AM_CONDITIONAL([CPIO_MT_COND], [test "$enable_mt" = yes])
 
 AC_CHECK_HEADERS([unistd.h stdlib.h string.h fcntl.h pwd.h grp.h sys/io/trioctl.h utmp.h getopt.h locale.h libintl.h sys/wait.h utime.h locale.h process.h sys/ioctl.h])
 
