@@ -27,9 +27,9 @@ gnu/quotearg.c
 gnu/version-etc.c
 gnu/xalloc-die.c
 
-lib/error.c
-lib/exit.c
-lib/names.c
+lib/paxerror.c
+lib/paxexit.c
+lib/paxnames.c
 lib/rtapelib.c
 
 rmt/rmt.c
