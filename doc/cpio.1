@@ -13,7 +13,7 @@
 .\"
 .\" You should have received a copy of the GNU General Public License
 .\" along with GNU cpio.  If not, see <http://www.gnu.org/licenses/>.
-.TH CPIO 1 "December 1, 2014" "CPIO" "GNU CPIO"
+.TH CPIO 1 "November 10, 2016" "CPIO" "GNU CPIO"
 .SH NAME
 cpio \- copy files to and from archives
 .SH SYNOPSIS
@@ -287,7 +287,8 @@ Link files instead of copying them, when possible.
 .SS Operation modifiers valid in copy-in and copy-out modes
 .TP
 .B \-\-absolute\-filenames
-Do not strip file system prefix components from the file names.
+Do not strip file system prefix components from the file names.  This
+is the default.
 .TP
 .B \-\-no\-absolute\-filenames
 Create all files relative to the current directory.

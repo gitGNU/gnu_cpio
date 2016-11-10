@@ -150,13 +150,19 @@ entries in a directory before printing the directory itself.  This
 limits the effects of restrictive directory permissions by printing the
 directory entries in a directory before the directory name itself.
 
+Extracting an archive requires a bit more thought.  First of all, by
+default cpio extracts the files with exactly the same name as stored
+in the archive.  That means that if the archive contains absolute
+paths, you will extract files to their absolute locations no matter
+what directory you're in when running the command.  You can instruct
+cpio to remove leading slashes using the
+@option{--no-absolute-filenames} option.  Nevertheless, the good
+practice is to always test the archive using @command{cpio -t} prior
+to extracting it.
 
-
-
-Extracting an archive requires a bit more thought because cpio will not
-create directories by default.  Another characteristic, is it will not
-overwrite existing files unless you tell it to.
-
+Furthermore, cpio will not create directories by default.
+Another characteristic, is it will not overwrite existing files unless
+you tell it to.
 
 @example
 @cartouche
@@ -165,7 +171,7 @@ overwrite existing files unless you tell it to.
 @end example
 
 This will retrieve the files archived in the file directory.cpio and
-place them in the present directory.  The @option{-i} option extracts the
+restore them to their locations.  The @option{-i} option extracts the
 archive and the @option{-v} shows the file names as they are extracted.
 If you are dealing with an archived directory tree, you need to use the
 @option{-d} option to create directories as necessary, something like:
@@ -176,11 +182,11 @@ If you are dealing with an archived directory tree, you need to use the
 @end cartouche
 @end example
 
-This will take the contents of the archive tree.cpio and extract it to
-the current directory.  If you try to extract the files on top of files
-of the same name that already exist (and have the same or later
-modification time) cpio will not extract the file unless told to do so
-by the -u option.  @xref{Copy-in mode}.
+This will take the contents of the archive tree.cpio and extract it.
+If you try to extract the files on top of files of the same name that
+already exist (and have the same or later modification time) cpio will
+not extract the file unless told to do so by the -u option.
+@xref{Copy-in mode}.
 
 
 In copy-pass mode, cpio copies files from one directory tree to another,
@@ -252,7 +258,8 @@ Append to an existing archive.
 @itemx --reset-access-time
 Reset the access times of files after reading them.
 @item --absolute-filenames
-Do not strip file system prefix components from the file names.
+Do not strip file system prefix components from the file names.  This
+is the default.
 @item --no-absolute-filenames
 Strip file system prefix components from the file names before storing
 them to the archive.
@@ -331,7 +338,8 @@ The following options can be used in copy-in mode:
 
 @table @option
 @item --absolute-filenames
-Do not strip file system prefix components from the file names.
+Do not strip file system prefix components from the file names.  This
+is the default.
 @item --no-absolute-filenames
 Create all files relative to the current directory.
 @item --block-size=@var{block-size}
