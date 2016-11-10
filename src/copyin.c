@@ -1378,30 +1378,35 @@ process_copy_in ()
 
 	}
 #endif
-      /* Is this the header for the TRAILER file?  */
-      if (strcmp (CPIO_TRAILER_NAME, file_hdr.c_name) == 0)
-	{
-	  done = true;
-	  break;
-	}
-
-      cpio_safer_name_suffix (file_hdr.c_name, false, !no_abs_paths_flag,
-			      false);
-      
-      /* Does the file name match one of the given patterns?  */
-      if (num_patterns <= 0)
-	skip_file = false;
+      if (file_hdr.c_namesize == 0)
+	skip_file = true;
       else
 	{
-	  skip_file = copy_matching_files;
-	  for (i = 0; i < num_patterns
-	       && skip_file == copy_matching_files; i++)
+	  /* Is this the header for the TRAILER file?  */
+	  if (strcmp (CPIO_TRAILER_NAME, file_hdr.c_name) == 0)
 	    {
-	      if (fnmatch (save_patterns[i], file_hdr.c_name, 0) == 0)
-		skip_file = !copy_matching_files;
+	      done = true;
+	      break;
+	    }
+
+	  cpio_safer_name_suffix (file_hdr.c_name, false, !no_abs_paths_flag,
+				  false);
+      
+	  /* Does the file name match one of the given patterns?  */
+	  if (num_patterns <= 0)
+	    skip_file = false;
+	  else
+	    {
+	      skip_file = copy_matching_files;
+	      for (i = 0; i < num_patterns
+		     && skip_file == copy_matching_files; i++)
+		{
+		  if (fnmatch (save_patterns[i], file_hdr.c_name, 0) == 0)
+		    skip_file = !copy_matching_files;
+		}
 	    }
 	}
-
+      
       if (skip_file)
 	{
 	  /* If we're skipping a file with links, there might be other
