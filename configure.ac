@@ -59,6 +59,8 @@ cpio_PAXUTILS
 CPIO_SYSDEP
 CPIO_PACKED_STRUCTS
 
+CPIO_DEFAULT_QUOTING_STYLE(escape)
+
 AC_ARG_ENABLE(mt,
  AC_HELP_STRING([--enable-mt], [Enable building of mt program]))
 

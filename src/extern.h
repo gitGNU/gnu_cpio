@@ -1,5 +1,5 @@
 /* extern.h - External declarations for cpio.  Requires system.h.
-   Copyright (C) 1990-1992, 2001, 2006-2007, 2009-2010, 2014-2015 Free
+   Copyright (C) 1990-1992, 2001, 2006-2007, 2009-2010, 2014-2016 Free
    Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
@@ -112,7 +112,6 @@ void read_in_binary (struct cpio_file_stat *file_hdr,
 void swab_array (char *arg, int count);
 void process_copy_in (void);
 void long_format (struct cpio_file_stat *file_hdr, char *link_name);
-void print_name_with_quoting (char *p);
 
 /* copyout.c */
 int write_out_header (struct cpio_file_stat *file_hdr, int out_des);

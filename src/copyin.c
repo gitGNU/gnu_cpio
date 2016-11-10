@@ -173,10 +173,8 @@ list_file (struct cpio_file_stat* file_hdr, int in_file_des)
     }
   else
     {
-      /* Debian hack: Modified to print a list of filenames
-	 terminiated by a null character when the -t and -0
-	 flags are used.  This has been submitted as a
-	 suggestion to "bug-gnu-utils@prep.ai.mit.edu".  -BEM */
+      /* Print out the name as it is.  The name_end delimiter is normally
+	 '\n', but can be reset to '\0' by the -0 option. */
       printf ("%s%c", file_hdr->c_name, name_end);
     }
 
@@ -788,63 +786,13 @@ long_format (struct cpio_file_stat *file_hdr, char *link_name)
 
   printf ("%s ", tbuf + 4);
 
-  print_name_with_quoting (file_hdr->c_name);
+  printf ("%s", quotearg (file_hdr->c_name));
   if (link_name)
     {
       printf (" -> ");
-      print_name_with_quoting (link_name);
+      printf ("%s", quotearg (link_name));
     }
   putc ('\n', stdout);
-}
-
-void
-print_name_with_quoting (register char *p)
-{
-  register unsigned char c;
-
-  while ( (c = *p++) )
-    {
-      switch (c)
-	{
-	case '\\':
-	  printf ("\\\\");
-	  break;
-
-	case '\n':
-	  printf ("\\n");
-	  break;
-
-	case '\b':
-	  printf ("\\b");
-	  break;
-
-	case '\r':
-	  printf ("\\r");
-	  break;
-
-	case '\t':
-	  printf ("\\t");
-	  break;
-
-	case '\f':
-	  printf ("\\f");
-	  break;
-
-	case ' ':
-	  printf ("\\ ");
-	  break;
-
-	case '"':
-	  printf ("\\\"");
-	  break;
-
-	default:
-	  if (c > 040 && c < 0177)
-	    putchar (c);
-	  else
-	    printf ("\\%03o", (unsigned int) c);
-	}
-    }
 }
 
 /* Read a pattern file (for the -E option).  Put a list of
