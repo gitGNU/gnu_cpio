@@ -15,7 +15,7 @@
 @copying
 This manual documents GNU cpio (version @value{VERSION}, @value{UPDATED}).
 
-Copyright @copyright{} 1995, 2001-2002, 2004, 2010, 2014-2015 Free
+Copyright @copyright{} 1995, 2001-2002, 2004, 2010, 2014-2015, 2017 Free
 Software Foundation, Inc.
 @sp 1
 @quotation
