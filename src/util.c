@@ -718,7 +718,6 @@ find_inode_val (ino_t node_num, unsigned long major_num,
 		 unsigned long minor_num)
 {
   struct inode_val sample;
-  struct inode_val *ival;
   
   if (!hash_table)
     return NULL;
@@ -768,7 +767,7 @@ add_inode (ino_t node_num, char *file_name, unsigned long major_num,
   return e;
 }
 
-static ino_t
+static void
 get_inode_and_dev (struct cpio_file_stat *hdr, struct stat *st)
 {
   if (renumber_inodes_option)
